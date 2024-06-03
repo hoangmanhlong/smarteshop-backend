@@ -1,5 +1,5 @@
-import express from 'express';
-import { readFileSync } from 'fs';
+var express = require('express');
+const { readFileSync } = require('fs');
 
 const app = express();
 const port = 3000;
