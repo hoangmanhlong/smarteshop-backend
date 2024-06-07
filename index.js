@@ -5,7 +5,7 @@ import morgan from "morgan";
 const app = express(); // create instance of express named app
 app.use(morgan("combined"));
 const port = 3000; // define a port that server will listener
-const data_source_path = "./data_source/products.json"; // data source path
+const data_source_path = "../data_source/products.json"; // data source path
 
 // create listener get products list from requestes
 app.get("/products", (req, res) => {
@@ -60,4 +60,4 @@ app.get("/products", (req, res) => {
   }
 });
 
-app.listen(port, () => console.log("Server is running..."));
+app.listen(port, () => console.log(`Server is running in ${port}`));
