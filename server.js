@@ -1,56 +1,63 @@
-var express = require('express');
-const { readFileSync } = require('fs');
+import express from "express";
+import { readFileSync } from "fs";
+import morgan from "morgan";
 
-const app = express();
-const port = 3000;
+const app = express(); // create instance of express named app
+app.use(morgan("combined"));
+const port = 3000; // define a port that server will listener
+const data_source_path = "./data_source/products.json"; // data source path
 
-// Endpoint to get product by ID
-// app.get('/products/:id', (req, res) => {
-//   const product = products.find(p => p.id == req.params.id);
-//   if (product) {
-//     res.json(product);
-//   } else {
-//     res.status(404).json({ error: 'Product not found' });
-//   }
-// });
+// create listener get products list from requestes
+app.get("/products", (req, res) => {
+  try {
+    let products = [];
 
-// Endpoint to get all products with skip and limit
-app.get('/products', (req, res) => {
-    // Load product data
-    let productsData = undefined;
-    let products = undefined;
     try {
-        productsData = JSON.parse(readFileSync('products.json', 'utf8'));
-        products = productsData.products;
+      const productsData = JSON.parse(readFileSync(data_source_path, "utf8")); // read data from above path
+      products = productsData.products; // get products list in data source
     } catch (e) {
-        products = []
+      // handle error
+      console.error("Error reading products data:", e);
     }
 
-    let { skip, limit } = req.query;
+    let { skip = 0, limit = 0 } = req.query; // read params from request
 
-    // Default values if skip and limit are not provided
-    skip = parseInt(skip) || 0;
-    limit = parseInt(limit) || 0;
+    // parse param to Int
+    skip = parseInt(skip);
+    limit = parseInt(limit);
+
+    // Validate skip and limit
+    if (isNaN(skip) || skip < 0) skip = 0;
+    if (isNaN(limit) || limit < 0) limit = 0;
 
     // Get the selected products
-    const selectedProducts = products.slice(skip, limit === 0 ? products.length : skip + limit);
+    const selectedProducts = products.slice(
+      skip,
+      limit === 0 ? products.length : skip + limit
+    );
 
     // Prepare the response
     const response = {
-        products: selectedProducts,
-        total: selectedProducts.length,
-        skip,
-        limit
+      products: selectedProducts,
+      total: selectedProducts.length,
+      skip,
+      limit,
     };
 
     res.json({
-        code: 200,
-        status: 1,
-        data: response,
-        message: ''
+      code: 200,
+      status: 0,
+      data: response,
+      message: "",
     });
+  } catch (e) {
+    res.json({
+      code: 500,
+      status: 0,
+      data: {},
+      message: "Error",
+    });
+  }
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
+app.listen(port, () => console.log("Server is running..."));
